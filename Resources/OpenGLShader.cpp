@@ -108,7 +108,7 @@ namespace OpenEngine {
         }
         
         void OpenGLShader::Unload() {
-            glDeleteShader(shaderProgram);
+            glDeleteProgram(shaderProgram);
             shaderProgram = 0;
         }
 
