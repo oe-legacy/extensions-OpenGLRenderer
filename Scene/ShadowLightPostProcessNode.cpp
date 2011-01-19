@@ -99,6 +99,8 @@ void ShadowLightPostProcessNode::DepthRenderer::Render(Renderers::RenderingEvent
     glPolygonOffset(1.1, 4.0);
 
 
+    // Draw it
+
     shadowNode->Accept(*this);
 
     // glBindTexture(GL_TEXTURE_2D,shadowNode->depthFB->GetDepthTexture()->GetID());
@@ -115,7 +117,7 @@ void ShadowLightPostProcessNode::DepthRenderer::Render(Renderers::RenderingEvent
     CHECK_FOR_GL_ERROR();
 
     // Reset viewing volume
-    //ApplyViewingVolume(*(arg.canvas.GetViewingVolume()));
+    ApplyViewingVolume(*(arg.canvas.GetViewingVolume()));
 
 }
 
@@ -192,9 +194,11 @@ void ShadowLightPostProcessNode::SetViewingVolume(IViewingVolume* v) {
 }
 
 void ShadowLightPostProcessNode::Initialize(Renderers::RenderingEventArg arg) {
+    //depthFB->GetDepthTexture()->SetMipmapping(true);
     arg.renderer.BindFrameBuffer(depthFB);
 
     glBindTexture(GL_TEXTURE_2D,depthFB->GetDepthTexture()->GetID());
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB);
     // GL_LINEAR does not make sense for depth texture. However, next tutorial shows usage of GL_LINEAR and PCF
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
