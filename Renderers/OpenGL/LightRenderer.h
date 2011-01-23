@@ -44,7 +44,7 @@ using OpenEngine::Renderers::RenderingEventArg;
 
 
 struct LightCountChangedEventArg {
-    int count;
+    unsigned int count;
 };
 
 /**

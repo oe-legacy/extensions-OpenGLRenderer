@@ -101,11 +101,12 @@ void ShaderLoader::VisitVertexArrayNode(VertexArrayNode* node) {
 void ShaderLoader::VisitMeshNode(MeshNode* node) { 
     if (!lr) return;
     MaterialPtr m = node->GetMesh()->GetMaterial();
+    if (m->shad) return; //only apply phong if no shader is present
     if (m->shading == Material::PHONG || m->shading == Material::BLINN) {
         IShaderResourcePtr shad = shaders[m];
         if (!shad) {
             logger.info << "loading phong shader" << logger.end;
-            shad = IShaderResourcePtr(new PhongShader(m, *lr));
+            shad = IShaderResourcePtr(new PhongShader(node->GetMesh(), *lr));
             shad->Load();
             TextureList texs = shad->GetTextures();
             for (unsigned int i = 0; i < texs.size(); ++i)

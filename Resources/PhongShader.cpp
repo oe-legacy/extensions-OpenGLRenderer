@@ -13,57 +13,52 @@
 #include <Resources/DirectoryManager.h>
 #include <Logging/Logger.h>
 #include <Resources/Texture2D.h>
+#include <Geometry/GeometrySet.h>
 
 namespace OpenEngine {
 namespace Resources {
         
 using namespace Geometry;
-
-    PhongShader::PhongShader(MaterialPtr mat, LightRenderer& lr)
+    PhongShader::PhongShader(MeshPtr mesh, LightRenderer& lr)
     : OpenGLShader(DirectoryManager::FindFileInPath("extensions/OpenGLRenderer/shaders/PhongShader.glsl"))
-    , mat(mat)
+    , mesh(mesh)
     , lr(lr)
+    , lights(0)
 {
     lr.LightCountChangedEvent().Attach(*this);
-    logger.info << "ambient: " << mat->ambient << logger.end;
-    logger.info << "diffuse: " << mat->diffuse << logger.end;
-    logger.info << "specular: " << mat->specular << logger.end;
-    unsigned char* d = new unsigned char[3];
-    d[0] = 0xFF;
-    d[1] = 0xFF;
-    d[2] = 0xFF;
-    whitetex = UCharTexture2DPtr(new Texture2D<unsigned char>(1, 1, 3, d));        
-    whitetex->SetFiltering(NONE);
-    whitetex->SetColorFormat(RGB);
-    whitetex->SetMipmapping(false);
-    whitetex->SetCompression(false);
-    whitetex->SetWrapping(REPEAT);
+    MaterialPtr mat = mesh->GetMaterial();
 
-    Vector<4,float> white(1.0);
     ambient = mat->Get2DTextures()["ambient"];
-    if (!ambient) {
-        ambient = whitetex;
-        logger.info << "no ambient" << logger.end;
+    if (ambient) {
+        AddDefine("AMBIENT_MAP");
+        SetTexture("ambientMap", ambient);
     }
-    // SetTexture("ambientMap", ambient);
     
     diffuse = mat->Get2DTextures()["diffuse"];
-    if (!diffuse) {
-        diffuse = whitetex;
-        logger.info << "no diffuse" << logger.end;
+    if (diffuse) {
+        AddDefine("DIFFUSE_MAP");
+        SetTexture("diffuseMap", diffuse);
     }
-    else mat->diffuse = white;
-
-    SetTexture("diffuseMap", diffuse);
 
     specular = mat->Get2DTextures()["specular"];
-    if (!specular) {
-        specular = whitetex;
-        logger.info << "no specular" << logger.end;
+    if (specular) {
+        AddDefine("SPECULAR_MAP");
+        SetTexture("specularMap", specular);
     }
-    // SetTexture("specularMap", specular);
 
-    SetUniform("lights", 0);
+    bump = mat->Get2DTextures()["normal"];
+    if (!bump)
+        bump = mat->Get2DTextures()["height"];
+    if (bump && (bump->GetChannels() >= 3)) {
+        logger.info << "bump channels: " << bump->GetChannels() << logger.end;
+        AddDefine("BUMP_MAP");
+        SetTexture("bumpMap", bump);
+        // tangents and bitangents
+        tans = mesh->GetGeometrySet()->GetAttributeList("tangent");
+        bitans = mesh->GetGeometrySet()->GetAttributeList("bitangent");
+    }
+    
+    AddDefine("NUM_LIGHTS", 1); // hack ... cannot compile shader with zero lights.
 }
 
 PhongShader::~PhongShader() {
@@ -71,16 +66,71 @@ PhongShader::~PhongShader() {
 }
 
 void PhongShader::Handle(LightCountChangedEventArg arg) {
+    if (arg.count == lights) return;
+    lights = arg.count;
+    if (lights == 0) return;
+
+    logger.info << "# of lights changed to " << lights << ". Recompiling phong shader..." << logger.end;
+
+    ClearDefines();
+    Unload();
+
+    if (ambient) {
+        AddDefine("AMBIENT_MAP");
+        SetTexture("ambientMap", ambient);
+    }
     
-    if (arg.count > 2) {
-        SetUniform("lights", 2);
-        logger.warning << "Phong shader is given " << arg.count << " lights but only 2 is supported." << logger.end;
+    if (diffuse) {
+        AddDefine("DIFFUSE_MAP");
+        SetTexture("diffuseMap", diffuse);
     }
-    else {
-        SetUniform("lights", arg.count);
-        logger.info << "Phong shader is given " << arg.count << " lights." << logger.end;
+
+    if (specular) {
+        AddDefine("SPECULAR_MAP");
+        SetTexture("specularMap", specular);
     }
+
+    if (bump) {
+        AddDefine("BUMP_MAP");
+        SetTexture("bumpMap", bump);
+    }
+    
+    AddDefine("NUM_LIGHTS", lights);    
+
+    Load();
 }
+
+void PhongShader::ApplyShader() {
+    if (lights == 0) return;
+    OpenGLShader::ApplyShader();
+    if (bump) {
+        SetAttribute("tangent", tans);
+        SetAttribute("bitangent", bitans);
+    }
+
+
+    // if (tans && bitans) {
+    //     tanLoc = glGetAttribLocation(shaderProgram,"tangent");
+    //     // logger.info << "shaderProg: " << shaderProgram << logger.end;
+    //     // logger.info << "tanloc: " << tanLoc << logger.end;
+    //     CHECK_FOR_GL_ERROR();
+    //     glEnableClientState(GL_VERTEX_ARRAY);
+    //     CHECK_FOR_GL_ERROR();
+    //     glEnableVertexAttribArray(tanLoc);
+    //     CHECK_FOR_GL_ERROR();
+    //     glVertexAttribPointer(tanLoc, tans->GetDimension(), GL_FLOAT, 0, 0, tans->GetVoidDataPtr());
+    //     CHECK_FOR_GL_ERROR();
+
+    //     bitanLoc = glGetAttribLocation(shaderProgram,"bitangent");
+    //     // logger.info << "bitanloc: " << bitanLoc << logger.end;
+    //     CHECK_FOR_GL_ERROR();
+    //     glEnableVertexAttribArray(bitanLoc);
+    //     CHECK_FOR_GL_ERROR();
+    //     glVertexAttribPointer(bitanLoc, bitans->GetDimension(), bitans->GetType(), 0, 0, bitans->GetVoidDataPtr());
+    //     CHECK_FOR_GL_ERROR();
+    // }
+}
+
 
 }
 }

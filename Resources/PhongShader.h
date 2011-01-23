@@ -14,14 +14,14 @@
 // #include <Resources/IShaderResource.h>
 #include <Resources/OpenGLShader.h>
 #include <Resources/ITexture2D.h>
-#include <Geometry/Material.h>
+#include <Geometry/Mesh.h>
 #include <Core/IListener.h>
 #include <Renderers/OpenGL/LightRenderer.h>
 
 namespace OpenEngine {
 namespace Resources {
         
-using Geometry::MaterialPtr;
+using Geometry::MeshPtr;
 using Core::IListener;
 using Renderers::OpenGL::LightCountChangedEventArg;
 using Renderers::OpenGL::LightRenderer;
@@ -29,13 +29,16 @@ using Renderers::OpenGL::LightRenderer;
 class PhongShader: public OpenGLShader, public IListener<LightCountChangedEventArg> {
 private:
     // IShaderResourcePtr shader;
-    MaterialPtr mat;
+    MeshPtr mesh;
     LightRenderer& lr;
-    ITexture2DPtr ambient, diffuse, specular, whitetex;
+    ITexture2DPtr ambient, diffuse, specular, bump, whitetex, blacktex;
+    IDataBlockPtr tans, bitans;
+    GLint tanLoc, bitanLoc;
+    unsigned int lights;
 public:
-    PhongShader(MaterialPtr mat, LightRenderer& lr);
+    PhongShader(MeshPtr mesh, LightRenderer& lr);
     virtual ~PhongShader();
-    //void ApplyShader();
+    void ApplyShader();
     void Handle(LightCountChangedEventArg arg);
 };
 

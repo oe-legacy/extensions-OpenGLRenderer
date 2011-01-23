@@ -393,15 +393,23 @@ namespace OpenEngine {
         GLuint OpenGLShader::LoadShader(vector<string> files, int type){
             GLuint shader = glCreateShader(type);
             
-            unsigned int size = files.size();
+            unsigned int size = defines.size() + files.size();
             const GLchar** shaderBits = new const GLchar*[size];
 
+            //Prepend defines
+            for (unsigned int i = 0; i < defines.size(); ++i){
+                GLchar* def = new GLchar[defines[i].size()+1];
+                strcpy (def, defines[i].c_str());
+                shaderBits[i] = def;
+            }
+
             // Read all the shaders from disk
-            for (unsigned int i = 0; i < size; ++i){
+            for (unsigned int i = 0; i < files.size(); ++i){
                 if (printinfo)
                     logger.info << "Loading shader: " << files[i] << logger.end;
-                shaderBits[i] = File::ReadShader<GLchar>(DirectoryManager::FindFileInPath(files[i]));
-                if (shaderBits[i] == NULL) return 0;
+                shaderBits[i+defines.size()] = File::ReadShader<GLchar>(DirectoryManager::FindFileInPath(files[i]));
+                if (shaderBits[i+defines.size()
+] == NULL) return 0;
             }
 
             glShaderSource(shader, size, shaderBits, NULL);
@@ -427,6 +435,22 @@ namespace OpenEngine {
             PrintShaderInfoLog(shader);
             return shader;
         }
-                
+
+
+void OpenGLShader::AddDefine(string name) {
+    defines.push_back(string("#define ") + name + string("\n"));
+}
+
+void OpenGLShader::AddDefine(string name, int val) {
+    std::stringstream v;
+    v << val;
+    defines.push_back(string("#define ") + name + string(" ") + v.str() + string("\n"));
+}
+
+void OpenGLShader::ClearDefines() {
+    defines.clear();
+}
+
     }
 }
+

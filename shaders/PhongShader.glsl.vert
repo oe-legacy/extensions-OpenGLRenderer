@@ -1,40 +1,44 @@
 varying vec3 normal, eyeVec;
-#define MAX_LIGHTS 2
-#define NUM_LIGHTS 1
-varying vec3 lightDir[MAX_LIGHTS];
+varying vec3 lightDir[NUM_LIGHTS];
+attribute vec3 tangent, bitangent;
+
 void main()
 {
+    vec3 vert = (gl_ModelViewMatrix * gl_Vertex).xyz;
+    vec3 n = normalize(gl_NormalMatrix * gl_Normal);
+    eyeVec = normalize(-vert);
+#ifdef BUMP_MAP
+    vec3 t = normalize(gl_NormalMatrix * tangent);
+    //vec3 b = cross(n,t);
+    vec3 b = normalize(gl_NormalMatrix * bitangent);
+
+    vec3 ev = eyeVec;
+	//transform eye vector into tangent space
+    eyeVec.x = dot(ev,t);
+ 	eyeVec.y = dot(ev,b);
+    eyeVec.z = dot(ev,n);
+#endif
+
+    for (int i = 0; i < NUM_LIGHTS; ++i) {
+
+        if (gl_LightSource[i].position.w == 0.0) {// if directional light
+            lightDir[i] = 
+                gl_LightSource[i].position.xyz; 
+        }
+        else { // else assume positional light
+            lightDir[i] =
+                normalize(gl_LightSource[i].position.xyz - vert);
+        }
+#ifdef BUMP_MAP
+        // transform lightdir into tangent space
+        vec3 ld = lightDir[i];
+        ld.x = dot(lightDir[i],t);
+        ld.y = dot(lightDir[i],b);
+        ld.z = dot(lightDir[i],n);
+        lightDir[i] = normalize(ld);
+#endif
+    }
     gl_TexCoord[0] = gl_MultiTexCoord0; 
-    gl_Position = ftransform();
-    normal = gl_NormalMatrix * gl_Normal;
-    vec4 vVertex = gl_ModelViewMatrix * gl_Vertex;
-    eyeVec = -vVertex.xyz;
-    int i;
-    for (i=0; i<NUM_LIGHTS; ++i)
-        lightDir[i] =
-      vec3(gl_LightSource[i].position.xyz - vVertex.xyz);
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    normal = n;
 }
-/* uniform int lights; */
-/* varying vec3 normal, lightDir[2], halfVec[2]; */
-/* varying float dist[2]; */
-
-/* void main() */
-/* {	 */
-/*     gl_TexCoord[0] = gl_MultiTexCoord0; */
-/* 	normal = normalize(gl_NormalMatrix * gl_Normal); */
-
-/*     for (int i = 0; i < 1; ++i) { */
-/*         halfVec[i]  = normalize(gl_LightSource[i].halfVector.xyz); */
-/*         if (gl_LightSource[i].position.w == 0.0) {// if directional light */
-/*             /\* lightDir[i] = normalize(gl_LightSource[i].position.xyz); *\/ */
-/*         } */
-/*         else { // else assume positional light */
-/*             vec3 aux = (gl_ModelViewMatrix * gl_Vertex).xyz; */
-/*             aux = gl_LightSource[i].position.xyz - aux; */
-/*             lightDir[i] = normalize(aux); */
-/*             dist[i] = length(aux); */
-/*         } */
-/*     } */
-/* 	gl_Position = ftransform(); */
-/* } */
-

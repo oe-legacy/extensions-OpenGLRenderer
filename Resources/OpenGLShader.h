@@ -74,6 +74,7 @@ namespace OpenEngine {
             
         protected:
             string resource;
+            vector<string> defines;
             vector<string> vertexShaders;
             vector<string> geometryShaders;
             vector<string> fragmentShaders;
@@ -108,7 +109,11 @@ namespace OpenEngine {
             void BindUniform(matrix mat);
             void DeleteData(uniform uni);
             void BindTextures();
-            
+
+            // test define stuff
+            void AddDefine(string name);
+            void AddDefine(string name, int val);
+            void ClearDefines();
         public:
             OpenGLShader();
             OpenGLShader(string resource);

@@ -23,12 +23,12 @@ namespace OpenEngine {
             // which attribs was bound to it? Then we also need to
             // bail early if values are already bound.
 
-            logger.info << "Trying to set attribute " << name << logger.end;
+            // logger.info << "Trying to set attribute " << name << logger.end;
 
             if (!HasAttribute(name))
                 return;
 
-            logger.info << "Setting attribute " << name << logger.end;
+            // logger.info << "Setting attribute " << name << logger.end;
 
             GLint loc = glGetAttribLocation(shaderProgram, name.c_str());
             glEnableClientState(GL_VERTEX_ARRAY);
