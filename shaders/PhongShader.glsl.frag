@@ -1,5 +1,6 @@
 varying vec3 normal, eyeVec;
 varying vec3 lightDir[NUM_LIGHTS];
+varying float dist[NUM_LIGHTS];
 
 uniform sampler2D ambientMap, diffuseMap, specularMap;
 uniform sampler2D bumpMap;
@@ -17,6 +18,14 @@ void main (void)
         gl_FrontMaterial.ambient;
 
     for (int i = 0; i < NUM_LIGHTS; ++i) {
+        float att = 1.0;
+        if (gl_LightSource[i].position.w == 1.0) {// if point light
+             att /=
+                 gl_LightSource[i].constantAttenuation +
+                 gl_LightSource[i].linearAttenuation * dist[i] +
+                 gl_LightSource[i].quadraticAttenuation * dist[i] * dist[i];
+        }
+
         color +=
 #ifdef AMBIENT_MAP
             texture2D(ambientMap, gl_TexCoord[0].st) *
@@ -31,16 +40,17 @@ void main (void)
         if (lambertTerm > 0.0)
             {
                 color +=
+                    att *
                     gl_LightSource[i].diffuse *
                     gl_FrontMaterial.diffuse *
-                    /* texture2D(diffuseMap, gl_TexCoord[0].st) * */
+                    //texture2D(diffuseMap, gl_TexCoord[0].st) *
                     lambertTerm;
               
-              
-                vec3 R = reflect(-l, n);
-                float specular = pow(max(dot(R, e), 0.0),
+                vec3 r = reflect(-l, n);
+                float specular = pow(max(dot(r, e), 0.0),
                                      gl_FrontMaterial.shininess);
                 color +=
+                    att *
                     gl_LightSource[i].specular *
 #ifdef SPECULAR_MAP
                     texture2D(specularMap, gl_TexCoord[0].st) *
@@ -52,7 +62,7 @@ void main (void)
 #ifdef DIFFUSE_MAP 
     // Weight the final color with the diffuse map.
     // This resembles the gl fixed function pipeline way.
-    color *= texture2D(diffuseMap, gl_TexCoord[0].st); 
+    color *= texture2D(diffuseMap, gl_TexCoord[0].st);  
 #endif
     gl_FragColor = color;
 }

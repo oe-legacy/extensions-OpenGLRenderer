@@ -1,5 +1,7 @@
 varying vec3 normal, eyeVec;
 varying vec3 lightDir[NUM_LIGHTS];
+varying float dist[NUM_LIGHTS];
+
 attribute vec3 tangent, bitangent;
 
 void main()
@@ -26,8 +28,10 @@ void main()
                 gl_LightSource[i].position.xyz; 
         }
         else { // else assume positional light
+            vec3 lv = gl_LightSource[i].position.xyz - vert;
+            dist[i] = length(lv);
             lightDir[i] =
-                normalize(gl_LightSource[i].position.xyz - vert);
+                normalize(lv);
         }
 #ifdef BUMP_MAP
         // transform lightdir into tangent space
