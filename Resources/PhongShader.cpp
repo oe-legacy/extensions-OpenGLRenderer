@@ -47,15 +47,15 @@ using namespace Geometry;
     }
 
     bump = mat->Get2DTextures()["normal"];
+    tans = mesh->GetGeometrySet()->GetAttributeList("tangent");
+    // tangents and bitangents
+    bitans = mesh->GetGeometrySet()->GetAttributeList("bitangent");
     if (!bump)
         bump = mat->Get2DTextures()["height"];
-    if (bump && (bump->GetChannels() >= 3)) {
+    if (bump && (bump->GetChannels() >= 3) && tans && bitans) {
         logger.info << "bump channels: " << bump->GetChannels() << logger.end;
         AddDefine("BUMP_MAP");
         SetTexture("bumpMap", bump);
-        // tangents and bitangents
-        tans = mesh->GetGeometrySet()->GetAttributeList("tangent");
-        bitans = mesh->GetGeometrySet()->GetAttributeList("bitangent");
     }
     
     AddDefine("NUM_LIGHTS", 1); // hack ... cannot compile shader with zero lights.
@@ -103,7 +103,7 @@ void PhongShader::Handle(LightCountChangedEventArg arg) {
 void PhongShader::ApplyShader() {
     if (lights == 0) return;
     OpenGLShader::ApplyShader();
-    if (bump) {
+    if (bump && tans && bitans) {
         SetAttribute("tangent", tans);
         SetAttribute("bitangent", bitans);
     }
