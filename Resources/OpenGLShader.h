@@ -81,6 +81,8 @@ namespace OpenEngine {
             std::map<std::string, Utils::DateTime> timestamps;
 
             GLuint shaderProgram;
+            GLuint fragmentShaderId;
+            GLuint vertexShaderId;
             GLint nextTexUnit;
 
             Utils::Timer timer;

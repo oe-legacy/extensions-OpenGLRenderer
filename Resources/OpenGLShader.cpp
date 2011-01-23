@@ -34,12 +34,16 @@ namespace OpenEngine {
             resource.clear();
             nextTexUnit = 0;
             shaderProgram = 0;
+            vertexShaderId = 0;
+            fragmentShaderId = 0;
         }
 
         OpenGLShader::OpenGLShader(string filename)
             : resource(filename) {
             nextTexUnit = 0;
             shaderProgram = 0;
+            vertexShaderId = 0;
+            fragmentShaderId = 0;
         }
 
         OpenGLShader::~OpenGLShader() {
@@ -108,8 +112,14 @@ namespace OpenEngine {
         }
         
         void OpenGLShader::Unload() {
+            glDetachShader(shaderProgram, fragmentShaderId);
+            glDetachShader(shaderProgram, vertexShaderId);
+            glDeleteShader(vertexShaderId);
+            glDeleteShader(fragmentShaderId);
             glDeleteProgram(shaderProgram);
             shaderProgram = 0;
+            vertexShaderId = 0;
+            fragmentShaderId = 0;
         }
 
         void OpenGLShader::ApplyShader(){
@@ -343,12 +353,12 @@ namespace OpenEngine {
 
             // attach vertex shader
             if (!vertexShaders.empty() && vertexSupport){
-                GLuint shader = LoadShader(vertexShaders, GL_VERTEX_SHADER);
+                vertexShaderId = LoadShader(vertexShaders, GL_VERTEX_SHADER);
 #if OE_SAFE
-                if (shader == 0)
+                if (vertexShaderId == 0)
                     throw Exception("Failed loading vertexshader");
 #endif
-                glAttachShader(shaderProgram, shader);
+                glAttachShader(shaderProgram, vertexShaderId);
             }
 
             /*        
@@ -365,12 +375,12 @@ namespace OpenEngine {
 
             // attach fragment shader
             if (!fragmentShaders.empty() && fragmentSupport){
-                GLuint shader = LoadShader(fragmentShaders, GL_FRAGMENT_SHADER);
+                fragmentShaderId = LoadShader(fragmentShaders, GL_FRAGMENT_SHADER);
 #if OE_SAFE
-                if (shader == 0)
+                if (fragmentShaderId == 0)
                     throw Exception("Failed loading fragmentshader");
 #endif
-                glAttachShader(shaderProgram, shader);
+                glAttachShader(shaderProgram, fragmentShaderId);
             }
             
             // Link the program object and print out the info log
