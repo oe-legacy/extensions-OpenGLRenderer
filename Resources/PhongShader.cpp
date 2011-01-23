@@ -90,7 +90,7 @@ void PhongShader::Handle(LightCountChangedEventArg arg) {
         SetTexture("specularMap", specular);
     }
 
-    if (bump) {
+    if (bump && tans && bitans) {
         AddDefine("BUMP_MAP");
         SetTexture("bumpMap", bump);
     }
