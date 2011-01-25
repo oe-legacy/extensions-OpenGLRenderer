@@ -99,6 +99,10 @@ void RenderingView::Handle(RenderingEventArg arg) {
             CHECK_FOR_GL_ERROR();
             currentTexture = 0;
         }
+
+        if (currentGeom) {
+            ApplyGeometrySet(GeometrySetPtr());
+        }
     }}
     
 /**
