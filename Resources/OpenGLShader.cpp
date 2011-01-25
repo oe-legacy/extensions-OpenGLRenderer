@@ -112,6 +112,7 @@ namespace OpenEngine {
         }
         
         void OpenGLShader::Unload() {
+            if (shaderModel == 0) return;
             glDetachShader(shaderProgram, fragmentShaderId);
             glDetachShader(shaderProgram, vertexShaderId);
             glDeleteShader(vertexShaderId);
