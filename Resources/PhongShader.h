@@ -35,6 +35,8 @@ private:
     IDataBlockPtr tans, bitans;
     GLint tanLoc, bitanLoc;
     unsigned int lights;
+
+    inline void Update();
 public:
     PhongShader(MeshPtr mesh, LightRenderer& lr);
     virtual ~PhongShader();

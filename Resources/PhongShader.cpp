@@ -23,58 +23,33 @@ using namespace Geometry;
     : OpenGLShader(DirectoryManager::FindFileInPath("extensions/OpenGLRenderer/shaders/PhongShader.glsl"))
     , mesh(mesh)
     , lr(lr)
-    , lights(0)
+    , lights(1) // hack ... cannot compile shader with zero lights.
 {
+
     lr.LightCountChangedEvent().Attach(*this);
     MaterialPtr mat = mesh->GetMaterial();
-
-    ambient = mat->Get2DTextures()["ambient"];
-    if (ambient) {
-        AddDefine("AMBIENT_MAP");
-        SetTexture("ambientMap", ambient);
-    }
-    
-    diffuse = mat->Get2DTextures()["diffuse"];
-    if (diffuse) {
-        AddDefine("DIFFUSE_MAP");
-        SetTexture("diffuseMap", diffuse);
-    }
-
-    specular = mat->Get2DTextures()["specular"];
-    if (specular) {
-        AddDefine("SPECULAR_MAP");
-        SetTexture("specularMap", specular);
-    }
-
-    bump = mat->Get2DTextures()["normal"];
     tans = mesh->GetGeometrySet()->GetAttributeList("tangent");
-    // tangents and bitangents
     bitans = mesh->GetGeometrySet()->GetAttributeList("bitangent");
+    ambient = mat->Get2DTextures()["ambient"];
+    diffuse = mat->Get2DTextures()["diffuse"];
+    specular = mat->Get2DTextures()["specular"];
+    bump = mat->Get2DTextures()["normal"];
     if (!bump)
         bump = mat->Get2DTextures()["height"];
-    if (bump && (bump->GetChannels() >= 3) && tans && bitans) {
-        logger.info << "bump channels: " << bump->GetChannels() << logger.end;
-        AddDefine("BUMP_MAP");
-        SetTexture("bumpMap", bump);
-    }
-    
-    AddDefine("NUM_LIGHTS", 1); // hack ... cannot compile shader with zero lights.
+    if (bump && bump->GetChannels() < 3) bump.reset();
+
+    logger.info << "mesh texs: " << mesh->GetGeometrySet()->GetTexCoords().size() << logger.end;
+
+    Update();
+
 }
 
 PhongShader::~PhongShader() {
 
 }
 
-void PhongShader::Handle(LightCountChangedEventArg arg) {
-    if (arg.count == lights) return;
-    lights = arg.count;
-    if (lights == 0) return;
-
-    logger.info << "# of lights changed to " << lights << ". Recompiling phong shader..." << logger.end;
-
-    ClearDefines();
-    Unload();
-
+void PhongShader::Update() {
+    MaterialPtr mat = mesh->GetMaterial();
     if (ambient) {
         AddDefine("AMBIENT_MAP");
         SetTexture("ambientMap", ambient);
@@ -82,7 +57,10 @@ void PhongShader::Handle(LightCountChangedEventArg arg) {
     
     if (diffuse) {
         AddDefine("DIFFUSE_MAP");
+        AddDefine("DIFFUSE_INDEX", mat->GetUVIndex(diffuse));
         SetTexture("diffuseMap", diffuse);
+
+        logger.info << "diffuse index: " << mat->GetUVIndex(diffuse) << logger.end;
     }
 
     if (specular) {
@@ -91,11 +69,29 @@ void PhongShader::Handle(LightCountChangedEventArg arg) {
     }
 
     if (bump && tans && bitans) {
+        logger.info << "bump channels: " << (unsigned int)bump->GetChannels() << logger.end;
         AddDefine("BUMP_MAP");
+        AddDefine("BUMP_INDEX", mat->GetUVIndex(bump));
         SetTexture("bumpMap", bump);
-    }
+
+        logger.info << "bump index: " << mat->GetUVIndex(bump) << logger.end;
+    }    
+
+    AddDefine("NUM_LIGHTS", lights); 
+}
+
+void PhongShader::Handle(LightCountChangedEventArg arg) {
+    if (arg.count == lights) return;
+    lights = arg.count;
+    if (lights == 0) return;
+
+    // logger.info << "# of lights changed to " << lights << ". Recompiling phong shader..." << logger.end;
+
+    ClearDefines();
+
+    Unload();
     
-    AddDefine("NUM_LIGHTS", lights);    
+    Update();
 
     Load();
 }

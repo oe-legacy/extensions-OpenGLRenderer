@@ -4,6 +4,8 @@ varying float dist[NUM_LIGHTS];
 
 attribute vec3 tangent, bitangent;
 
+//#undef BUMP_MAP
+
 void main()
 {
     vec3 vert = (gl_ModelViewMatrix * gl_Vertex).xyz;
@@ -42,7 +44,14 @@ void main()
         lightDir[i] = normalize(ld);
 #endif
     }
-    gl_TexCoord[0] = gl_MultiTexCoord0; 
+
+    gl_TexCoord[0] = gl_MultiTexCoord0;
+    gl_TexCoord[1] = gl_MultiTexCoord1; 
+    gl_TexCoord[2] = gl_MultiTexCoord2; 
+    gl_TexCoord[3] = gl_MultiTexCoord3; 
+    gl_TexCoord[4] = gl_MultiTexCoord4; 
+    gl_TexCoord[5] = gl_MultiTexCoord5; 
+
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
     normal = n;
 }

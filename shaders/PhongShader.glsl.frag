@@ -5,10 +5,11 @@ varying float dist[NUM_LIGHTS];
 uniform sampler2D ambientMap, diffuseMap, specularMap;
 uniform sampler2D bumpMap;
 
+//#undef BUMP_MAP
 void main (void)
 {
 #ifdef BUMP_MAP
-    vec3 n = normalize(texture2D(bumpMap, gl_TexCoord[0].st).rgb * vec3(2.0) - vec3(1.0));
+    vec3 n = texture2D(bumpMap, gl_TexCoord[BUMP_INDEX].st).rgb * vec3(2.0) - vec3(1.0);
 #else
     vec3 n = normalize(normal);
 #endif  
@@ -59,11 +60,14 @@ void main (void)
                     specular;
             }
     }
-#ifdef DIFFUSE_MAP 
+#ifdef DIFFUSE_MAP  
     // Weight the final color with the diffuse map.
     // This resembles the gl fixed function pipeline way.
-    color *= texture2D(diffuseMap, gl_TexCoord[0].st);  
+#ifdef DIFFUSE_INDEX
+    color *= texture2D(diffuseMap, gl_TexCoord[DIFFUSE_INDEX].st);
 #endif
-    gl_FragColor = color;
+#endif 
+    gl_FragColor = color; 
+    //gl_FragColor.rgb = n; 
 }
 
