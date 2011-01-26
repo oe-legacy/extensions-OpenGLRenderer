@@ -2,7 +2,7 @@ varying vec3 normal, eyeVec;
 varying vec3 lightDir[NUM_LIGHTS];
 varying float dist[NUM_LIGHTS];
 
-uniform sampler2D ambientMap, diffuseMap, specularMap;
+uniform sampler2D ambientMap, diffuseMap, specularMap, opacityMap;
 uniform sampler2D bumpMap;
 
 //#undef BUMP_MAP
@@ -67,6 +67,17 @@ void main (void)
     color *= texture2D(diffuseMap, gl_TexCoord[DIFFUSE_INDEX].st);
 #endif
 #endif 
+
+#ifdef OPACITY_MAP  
+#ifdef OPACITY_INDEX
+    color.a = texture2D(opacityMap, gl_TexCoord[OPACITY_INDEX].st).r;
+
+    // weird hack ...
+    if (color.a < .9) 
+    gl_FragDepth = 1.0;
+#endif
+#endif 
+
     gl_FragColor = color; 
     //gl_FragColor.rgb = n; 
 }

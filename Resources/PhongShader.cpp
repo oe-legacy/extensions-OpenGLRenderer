@@ -34,6 +34,7 @@ using namespace Geometry;
     diffuse = mat->Get2DTextures()["diffuse"];
     specular = mat->Get2DTextures()["specular"];
     bump = mat->Get2DTextures()["normal"];
+    opacity = mat->Get2DTextures()["opacity"];
     if (!bump)
         bump = mat->Get2DTextures()["height"];
     if (bump && bump->GetChannels() < 3) bump.reset();
@@ -76,6 +77,14 @@ void PhongShader::Update() {
 
         logger.info << "bump index: " << mat->GetUVIndex(bump) << logger.end;
     }    
+
+    if (opacity) {
+        AddDefine("OPACITY_MAP");
+        AddDefine("OPACITY_INDEX", mat->GetUVIndex(opacity));
+        SetTexture("opacityMap", opacity);
+        
+        logger.info << "opacity index: " << mat->GetUVIndex(diffuse) << logger.end;
+    }
 
     AddDefine("NUM_LIGHTS", lights); 
 }

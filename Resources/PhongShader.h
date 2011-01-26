@@ -31,7 +31,7 @@ private:
     // IShaderResourcePtr shader;
     MeshPtr mesh;
     LightRenderer& lr;
-    ITexture2DPtr ambient, diffuse, specular, bump, whitetex, blacktex;
+    ITexture2DPtr ambient, diffuse, specular, bump, opacity;
     IDataBlockPtr tans, bitans;
     GLint tanLoc, bitanLoc;
     unsigned int lights;
