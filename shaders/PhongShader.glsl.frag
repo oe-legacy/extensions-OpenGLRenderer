@@ -18,6 +18,18 @@ void main (void)
         gl_LightModel.ambient * 
         gl_FrontMaterial.ambient;
 
+#ifdef OPACITY_MAP  
+#ifdef OPACITY_INDEX
+    color.a = texture2D(opacityMap, gl_TexCoord[OPACITY_INDEX].st).r;
+
+    // weird hack ... should be if (color.a == 0.0)
+    if (color.a < .9) 
+        discard;
+#endif
+#endif 
+
+
+
     for (int i = 0; i < NUM_LIGHTS; ++i) {
         float att = 1.0;
         if (gl_LightSource[i].position.w == 1.0) {// if point light
@@ -65,16 +77,6 @@ void main (void)
     // This resembles the gl fixed function pipeline way.
 #ifdef DIFFUSE_INDEX
     color *= texture2D(diffuseMap, gl_TexCoord[DIFFUSE_INDEX].st);
-#endif
-#endif 
-
-#ifdef OPACITY_MAP  
-#ifdef OPACITY_INDEX
-    color.a = texture2D(opacityMap, gl_TexCoord[OPACITY_INDEX].st).r;
-
-    // weird hack ...
-    if (color.a < .9) 
-    gl_FragDepth = 1.0;
 #endif
 #endif 
 
