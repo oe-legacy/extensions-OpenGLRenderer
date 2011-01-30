@@ -112,10 +112,6 @@ namespace OpenEngine {
             void DeleteData(uniform uni);
             void BindTextures();
 
-            // test define stuff
-            void AddDefine(string name);
-            void AddDefine(string name, int val);
-            void ClearDefines();
         public:
             OpenGLShader();
             OpenGLShader(string resource);
@@ -134,6 +130,11 @@ namespace OpenEngine {
             void GetTexture(string name, ITexture2DPtr& tex);
             void GetTexture(string name, ITexture3DPtr& tex);
             TextureList GetTextures();
+
+            // test define stuff
+            void AddDefine(string name);
+            void AddDefine(string name, int val);
+            void ClearDefines();
 
             // Uniform functions
 #undef GL_SHADER_SCALAR
