@@ -132,6 +132,7 @@ namespace OpenEngine {
             TextureList GetTextures();
 
             // test define stuff
+            void AddVersion(string val);
             void AddDefine(string name);
             void AddDefine(string name, int val);
             void ClearDefines();

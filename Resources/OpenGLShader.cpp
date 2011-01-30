@@ -432,7 +432,7 @@ namespace OpenEngine {
 #if OE_SAFE
             if (compiled==0) {
                 logger.error << "Failed compiling shader program consisting of: " << logger.end;
-                for (unsigned int i = 0; i< size; ++i)
+                for (unsigned int i = 0; i< files.size(); ++i)
                     logger.error << files[i] << logger.end;
                 GLsizei bufsize;
                 const int maxBufSize = 100;
@@ -448,7 +448,12 @@ namespace OpenEngine {
         }
 
 
-void OpenGLShader::AddDefine(string name) {
+void OpenGLShader::AddVersion(string val) {    
+    defines.push_back(string("#version ") + val + string("\n"));
+}
+
+
+void OpenGLShader::AddDefine(string name) {    
     defines.push_back(string("#define ") + name + string("\n"));
 }
 
