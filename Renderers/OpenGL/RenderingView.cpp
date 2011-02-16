@@ -204,6 +204,7 @@ void RenderingView::ApplyRenderState(RenderStateNode* node) {
     // replace current state
     RenderStateNode* prevCurrent = currentRenderState;
     currentRenderState = node;
+    // visit sub tree
     node->VisitSubNodes(*this);
     // undo differences
     changes->Invert();
