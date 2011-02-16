@@ -202,7 +202,7 @@ void RenderingView::VisitRenderStateNode(Scene::RenderStateNode* node) {
     RenderStateNode* prevCurrent = currentRenderState;
 
     // apply combined render state
-    currentRenderState = node->GetCombined(*currentRenderState);
+    currentRenderState = currentRenderState->GetCombined(*node);
     ApplyRenderState(currentRenderState);
 
     // visit sub tree
