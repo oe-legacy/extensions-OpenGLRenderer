@@ -197,21 +197,22 @@ void RenderingView::ApplyRenderState(RenderStateNode* node) {
  *
  * @param node Render state node to apply.
  */
-    void RenderingView::VisitRenderStateNode(Scene::RenderStateNode* node) {
-    // apply differences between current state and node
-    RenderStateNode* changes = node->GetDifference(*currentRenderState);
-    ApplyRenderState(changes);
-    // replace current state
+void RenderingView::VisitRenderStateNode(Scene::RenderStateNode* node) {
+    // save old state
     RenderStateNode* prevCurrent = currentRenderState;
-    currentRenderState = node;
+
+    // apply combined render state
+    currentRenderState = node->GetCombined(*currentRenderState);
+    ApplyRenderState(currentRenderState);
+
     // visit sub tree
     node->VisitSubNodes(*this);
-    // undo differences
-    changes->Invert();
-    ApplyRenderState(changes);
+
     // restore previous state
+    delete currentRenderState;
     currentRenderState = prevCurrent;
-    delete changes;
+    ApplyRenderState(currentRenderState);
+
     CHECK_FOR_GL_ERROR();
 }
 
