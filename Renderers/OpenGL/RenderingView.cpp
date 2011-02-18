@@ -271,7 +271,7 @@ void RenderingView::ApplyMaterial(MaterialPtr mat) {
     if (currentShader != NULL) currentTexture = 0;
     
     // if the face has no texture reset the current texture 
-    else if (mat->Get2DTextures().size() == 0) {
+    else if (mat->Get2DTextures().size() == 0) || !renderTexture) {
         glBindTexture(GL_TEXTURE_2D, 0); // @todo, remove this if not needed, release texture
         glDisable(GL_TEXTURE_2D);
         CHECK_FOR_GL_ERROR();
