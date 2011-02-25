@@ -82,10 +82,10 @@ namespace OpenEngine {
             vertexSupport = fragmentSupport = true; // is true when GL 2.0 is supported
             geometrySupport = GLEW_ARB_geometry_shader4;
 
-            logger.info << "Running shader model " << shaderModel << logger.end;
-            logger.info << "Vertex shader support: " << vertexSupport << logger.end;
-            logger.info << "Geometry shader support: " << geometrySupport << logger.end;
-            logger.info << "Fragment shader support: " << fragmentSupport << logger.end;
+            // logger.info << "Running shader model " << shaderModel << logger.end;
+            // logger.info << "Vertex shader support: " << vertexSupport << logger.end;
+            // logger.info << "Geometry shader support: " << geometrySupport << logger.end;
+            // logger.info << "Fragment shader support: " << fragmentSupport << logger.end;
         }
 
         void OpenGLShader::Load() {
