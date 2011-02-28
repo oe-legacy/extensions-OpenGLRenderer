@@ -191,10 +191,12 @@ unsigned int SplitScreenCanvas::GetHeight() const {
     
 void SplitScreenCanvas::SetWidth(const unsigned int width) {
     backend->SetDimensions(width, backend->GetTexture()->GetHeight());
+    UpdateChildCanvases();
 }
 
 void SplitScreenCanvas::SetHeight(const unsigned int height) {
     backend->SetDimensions(backend->GetTexture()->GetWidth(), height);
+    UpdateChildCanvases();
 }
     
 ITexture2DPtr SplitScreenCanvas::GetTexture() {
