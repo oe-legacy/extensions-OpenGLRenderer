@@ -241,7 +241,8 @@ unsigned int Renderer::GLTypeSize(Type t){
         return sizeof(GLfloat);
     case Types::DOUBLE:
         return sizeof(GLdouble);
-    case Types::NOTYPE:
+    default:
+        //case Types::NOTYPE:
         return 0;
     }
     return sizeof(GLshort);
