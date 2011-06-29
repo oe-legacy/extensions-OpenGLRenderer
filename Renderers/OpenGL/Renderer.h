@@ -131,6 +131,7 @@ public:
     virtual void LoadTexture(ITexture2D* texr);
     virtual void LoadTexture(ITexture3DPtr texr);
     virtual void LoadTexture(ITexture3D* texr);
+    virtual void BindTexture(ICubemapPtr texr);
     virtual void RebindTexture(ITexture2DPtr texr, unsigned int x, unsigned int y, unsigned int w, unsigned int h);
     virtual void RebindTexture(ITexture2D* texr, unsigned int x, unsigned int y, unsigned int w, unsigned int h);
     virtual void RebindTexture(ITexture3DPtr texr, unsigned int x, unsigned int y, unsigned int z, unsigned int w, unsigned int h, unsigned int d);

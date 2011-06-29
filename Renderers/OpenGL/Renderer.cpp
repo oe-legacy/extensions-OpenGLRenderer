@@ -532,6 +532,10 @@ void Renderer::LoadTexture(ITexture3D* texr) {
         texr->Unload();
 }
 
+void Renderer::BindTexture(ICubemapPtr cmap) {
+    
+}
+
 void Renderer::RebindTexture(ITexture2DPtr texr, unsigned int xOffset, unsigned int yOffset, unsigned int width, unsigned int height) {
     RebindTexture(texr.get(), xOffset, yOffset, width, height);
 }

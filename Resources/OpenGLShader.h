@@ -26,6 +26,8 @@ namespace OpenEngine {
         typedef boost::shared_ptr<ITexture2D> ITexture2DPtr;
         class ITexture3D;
         typedef boost::shared_ptr<ITexture3D> ITexture3DPtr;
+        class ICubemap;
+        typedef boost::shared_ptr<ICubemap> ICubemapPtr;
 
         class IDataBlock;
         typedef boost::shared_ptr<IDataBlock> IDataBlockPtr;
@@ -63,6 +65,11 @@ namespace OpenEngine {
                 GLint texUnit;
                 ITexture3DPtr tex;
             };
+            struct samplerCubemap{
+                GLuint loc;
+                GLint texUnit;
+                ICubemapPtr tex;
+            };
         }
         
         using namespace OpenGLShaderStructs;
@@ -99,6 +106,9 @@ namespace OpenEngine {
             map<string, sampler3D> boundTex3Ds;
             map<string, sampler3D> unboundTex3Ds;
 
+            map<string, samplerCubemap> boundCubemaps;
+            map<string, samplerCubemap> unboundCubemaps;
+
             void LoadResource(string resource);
             void ResetProperties();
             void PrintShaderInfoLog(GLuint shader);
@@ -127,8 +137,10 @@ namespace OpenEngine {
             
             void SetTexture(string name, ITexture2DPtr tex, bool force = false);
             void SetTexture(string name, ITexture3DPtr tex, bool force = false);
+            void SetTexture(string name, ICubemapPtr tex, bool force = false);
             void GetTexture(string name, ITexture2DPtr& tex);
             void GetTexture(string name, ITexture3DPtr& tex);
+            void GetTexture(string name, ICubemapPtr& tex);
             TextureList GetTextures();
 
             // test define stuff

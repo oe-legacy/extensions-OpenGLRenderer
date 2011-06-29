@@ -12,6 +12,7 @@
 
 #include <Resources/ITexture2D.h>
 #include <Resources/ITexture3D.h>
+#include <Resources/ICubemap.h>
 
 namespace OpenEngine {
     namespace Resources {
@@ -59,6 +60,29 @@ namespace OpenEngine {
                 sam.loc = 0;
                 sam.texUnit = 0;
                 unboundTex3Ds[name] = sam;
+            }
+        }
+
+        void OpenGLShader::SetTexture(string name, ICubemapPtr tex, bool force){
+            samplerCubemap sam;
+            sam.tex = tex;
+            if (force){
+                map<string, samplerCubemap>::iterator bound = boundCubemaps.find(name);
+                if (bound != boundCubemaps.end()){ 
+                    // sampler already bound, replace it's texture
+                    bound->second.tex = sam.tex;
+                }else{
+                    // Set the samplers values and add it to the bound
+                    // map.
+                    sam.loc = GetUniLoc(name.c_str());
+                    sam.texUnit = nextTexUnit++;
+                    glUniform1i(sam.loc, sam.texUnit);
+                    boundCubemaps[name] = sam;
+                }
+            }else{
+                sam.loc = 0;
+                sam.texUnit = 0;
+                unboundCubemaps[name] = sam;
             }
         }
 
