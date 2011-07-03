@@ -22,6 +22,7 @@
 
 #include <Resources/ITexture2D.h>
 #include <Resources/ITexture3D.h>
+#include <Resources/ICubemap.h>
 #include <Resources/FrameBuffer.h>
 
 #include <Resources/OpenGLShader.h>
@@ -533,7 +534,61 @@ void Renderer::LoadTexture(ITexture3D* texr) {
 }
 
 void Renderer::BindTexture(ICubemapPtr cmap) {
+    if (cmap == NULL || cmap->GetID() != 0) return;
+
+    GLuint texid;
+    glGenTextures(1, &texid);
+    CHECK_FOR_GL_ERROR();
+
+    cmap->SetID(texid);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texid);
+    CHECK_FOR_GL_ERROR();
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    CHECK_FOR_GL_ERROR();
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    CHECK_FOR_GL_ERROR();
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_GENERATE_MIPMAP, GL_FALSE);
+    switch(cmap->GetFiltering()){
+    case NONE:
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    default:
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+    CHECK_FOR_GL_ERROR();
+
+    // Only support for RGBA32
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, // mipmaplevel
+                 GL_RGBA, cmap->Width(), cmap->Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 cmap->GetRawData(ICubemap::NEGATIVE_X));
+    CHECK_FOR_GL_ERROR();
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, // mipmaplevel
+                 GL_RGBA, cmap->Width(), cmap->Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 cmap->GetRawData(ICubemap::POSITIVE_X));
+    CHECK_FOR_GL_ERROR();
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, // mipmaplevel
+                 GL_RGBA, cmap->Width(), cmap->Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 cmap->GetRawData(ICubemap::NEGATIVE_Y));
+    CHECK_FOR_GL_ERROR();
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, // mipmaplevel
+                 GL_RGBA, cmap->Width(), cmap->Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 cmap->GetRawData(ICubemap::POSITIVE_Y));
+    CHECK_FOR_GL_ERROR();
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, // mipmaplevel
+                 GL_RGBA, cmap->Width(), cmap->Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 cmap->GetRawData(ICubemap::NEGATIVE_Z));
+    CHECK_FOR_GL_ERROR();
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, // mipmaplevel
+                 GL_RGBA, cmap->Width(), cmap->Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 cmap->GetRawData(ICubemap::POSITIVE_Z));
+    CHECK_FOR_GL_ERROR();
     
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 void Renderer::RebindTexture(ITexture2DPtr texr, unsigned int xOffset, unsigned int yOffset, unsigned int width, unsigned int height) {
