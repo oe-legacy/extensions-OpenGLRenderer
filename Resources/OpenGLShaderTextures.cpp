@@ -14,6 +14,8 @@
 #include <Resources/ITexture3D.h>
 #include <Resources/ICubemap.h>
 
+#include <Logging/Logger.h>
+
 namespace OpenEngine {
     namespace Resources {
 
@@ -64,6 +66,7 @@ namespace OpenEngine {
         }
 
         void OpenGLShader::SetTexture(string name, ICubemapPtr tex, bool force){
+            logger.info << "SetTexture(" << name << ", " << tex->GetID() << ")" << logger.end;
             samplerCubemap sam;
             sam.tex = tex;
             if (force){
@@ -105,6 +108,18 @@ namespace OpenEngine {
 #if OE_SAFE
                 if (itr == boundTex3Ds.end())
                     throw Exception("3D texture " + name + " not found");
+#endif
+            }
+            tex = itr->second.tex;
+        }
+
+        void OpenGLShader::GetTexture(string name, ICubemapPtr& tex){
+            map<string, samplerCubemap>::iterator itr = unboundCubemaps.begin();
+            if (itr == unboundCubemaps.end()){
+                itr = boundCubemaps.begin();
+#if OE_SAFE
+                if (itr == boundCubemaps.end())
+                    throw Exception("Cubemap " + name + " not found");
 #endif
             }
             tex = itr->second.tex;
@@ -177,6 +192,29 @@ namespace OpenEngine {
             }
             unboundTex3Ds.clear();
 
+            {
+                map<string, samplerCubemap>::iterator lazy = unboundCubemaps.begin();
+                while(lazy != unboundCubemaps.end()){
+                    // Check if the texture already exists
+                    string name = lazy->first;
+                    samplerCubemap sam = lazy->second;
+                    map<string, samplerCubemap>::iterator bound = boundCubemaps.find(name);
+                    if (bound != boundCubemaps.end()){ 
+                    // sampler already bound, replace it's texture
+                        bound->second.tex = sam.tex;
+                    }else{
+                        // Set the samplers values and add it to the bound
+                        // map.
+                        sam.loc = GetUniLoc(name.c_str());
+                        sam.texUnit = nextTexUnit++;
+                        glUniform1i(sam.loc, sam.texUnit);
+                        boundCubemaps[name] = sam;
+                    }
+                    lazy++;
+                }
+                unboundCubemaps.clear();
+            }
+
             // Bind all the textures
             map<string, sampler2D>::iterator itr2 = boundTex2Ds.begin();
             while(itr2 != boundTex2Ds.end()){
@@ -189,6 +227,12 @@ namespace OpenEngine {
                 glActiveTexture(GL_TEXTURE0 + itr3->second.texUnit);
                 glBindTexture(itr3->second.tex->GetUseCase(), itr3->second.tex->GetID());
                 itr3++;
+            }
+            map<string, samplerCubemap>::iterator itrCube = boundCubemaps.begin();
+            while(itrCube != boundCubemaps.end()){
+                glActiveTexture(GL_TEXTURE0 + itrCube->second.texUnit);
+                glBindTexture(GL_TEXTURE_CUBE_MAP, itrCube->second.tex->GetID());
+                itrCube++;
             }
 
             // reset the active texture

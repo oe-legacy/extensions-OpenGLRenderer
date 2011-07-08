@@ -168,13 +168,19 @@ namespace OpenEngine {
             // specified in the glsl file.
             boundUniforms.insert(unboundUniforms.begin(), unboundUniforms.end());
             unboundUniforms = map<string, uniform>(boundUniforms);
+            boundUniforms.clear();
+            
             boundTex2Ds.insert(unboundTex2Ds.begin(), unboundTex2Ds.end());
             unboundTex2Ds = map<string, sampler2D>(boundTex2Ds);
+            boundTex2Ds.clear();
+            
             boundTex3Ds.insert(unboundTex3Ds.begin(), unboundTex3Ds.end());
             unboundTex3Ds = map<string, sampler3D>(boundTex3Ds);
-            boundUniforms.clear();
-            boundTex2Ds.clear();
             boundTex3Ds.clear();
+            
+            boundCubemaps.insert(unboundCubemaps.begin(), unboundCubemaps.end());
+            unboundCubemaps = map<string, samplerCubemap>(boundCubemaps);
+            boundCubemaps.clear();
 
             // Set all their loc's to 0 since we no longer know where they are.
             map<string, uniform>::iterator itr = unboundUniforms.begin();
@@ -191,6 +197,11 @@ namespace OpenEngine {
             while (itr3 != unboundTex3Ds.end()){
                 itr3->second.loc = 0;
                 itr3++;
+            }
+            map<string, samplerCubemap>::iterator itrCube = unboundCubemaps.begin();
+            while (itrCube != unboundCubemaps.end()){
+                itrCube->second.loc = 0;
+                itrCube++;
             }
         }
 
