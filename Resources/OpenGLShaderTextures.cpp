@@ -14,8 +14,6 @@
 #include <Resources/ITexture3D.h>
 #include <Resources/ICubemap.h>
 
-#include <Logging/Logger.h>
-
 namespace OpenEngine {
     namespace Resources {
 
@@ -66,7 +64,6 @@ namespace OpenEngine {
         }
 
         void OpenGLShader::SetTexture(string name, ICubemapPtr tex, bool force){
-            logger.info << "SetTexture(" << name << ", " << tex->GetID() << ")" << logger.end;
             samplerCubemap sam;
             sam.tex = tex;
             if (force){
