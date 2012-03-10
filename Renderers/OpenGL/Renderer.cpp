@@ -183,7 +183,7 @@ GLint Renderer::GLInternalColorFormat(ColorFormat f){
     case RGBA_COMPRESSED: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
     case RGB32F: return GL_RGB32F;
     case RGBA32F: return GL_RGBA32F;
-    case DEPTH: return GL_DEPTH_COMPONENT;
+    case DEPTH: return GL_DEPTH_COMPONENT32;
     default: 
         logger.warning << "Unsupported color format: " << f << logger.end;
         logger.warning << "Defaulting to RGBA." << logger.end;
